@@ -4,32 +4,30 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Users{
-    Scanner scan;
+    Scanner scan = new Scanner(System.in);
+    
     private String login;
     private String pass;
     private Path usersFile;
     private List<String> usersList;
-    
-    public Users(){
-        this.scan = new Scanner(System.in);
 
+    Menu menu;
+    
+    public Users(Menu menu){
+        this.menu = menu;
+        
         //LÊ ARQUIVO TXT
-        this.usersFile = Paths.get("C:/Users/HSK/Desktop/JAVA/Pratique/users.data.txt");
+        this.usersFile = Paths.get("./users.data.txt");
+ 
         try {
             this.usersList = Files.readAllLines(usersFile);
         } catch (Exception e) {
             System.out.println("ERRO: " + e);
         }
     }
-    
-    public void menuLogin(){
-        System.out.println("Digite o seu login:");
-        login = scan.next();
-    }
-    
-    public void menuPass(){
-        System.out.println("Digite a sua senha:");
-        pass = scan.next();
+
+    public String getLogin(){
+        return this.login;
     }
     
     public Boolean checkLogin(){
@@ -58,56 +56,52 @@ public class Users{
     }
 
     public Boolean checkPass(){
-        Boolean passValidation = false;
-
         //VERIFICA SE A SENHA ESTA CORRETA
-        if(usersList.contains(login + "," + pass)){
-            passValidation = true;
-        }else{
-            passValidation = false;
-        }
-
-        return passValidation;
+        return usersList.contains(login + "," + pass);
     }
 
-    public void setLogin(){
-        menuLogin();
+    public void userLogin(){
+        this.login = menu.login();
 
         if(checkLogin()){
-            menuPass();
+            this.pass = menu.pass();
 
             if(checkPass()){
-                System.out.println("Login efetuado com sucesso!");
+                menu.mensagem("            Login efetuado com sucesso!");
+                menu.InitialEvents();
             }else{
-                System.out.println("Senha invalida tente novamente");
-                setLogin();
+                menu.mensagem("            Senha invalida tente novamente");
+                userLogin();
             }
 
         }else{
-            System.out.println("Login não encontrado, tente novamente...");
-            setLogin();
+            menu.mensagem("         Login não encontrado, tente novamente");
+            userLogin();
         }
     }
 
     public void userRegister(){
-        System.out.println("Por favor registre um novo usuario...");
-        menuLogin();
+        this.login = menu.login();
 
         //VERIFICA SE O LOGIN JA EXISTE
         if(checkLogin()){
-            System.out.println("Usuario já cadastrado, por favor realize o login...");
-            setLogin();
+            menu.mensagem("    Usuario já cadastrado, por favor realize o login");
+            userLogin();
 
         }else{
-            menuPass();
+            this.pass = menu.pass();
+
             //REGISTRA USUARIO E SENHA NO ARQUIVO
             try {
                 usersList.add(login + "," + pass);
                 Files.write(usersFile, usersList);
-                System.out.println("Usuario registrado com sucesso!");
+                menu.mensagem("            Usuario registrado com sucesso!");
+            
             } catch (Exception e) {
                 System.out.println("ERRO: " + e);
             }
         }
     }
+
+
 }
